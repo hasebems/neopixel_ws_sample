@@ -25,13 +25,6 @@ SK6812 sk(NUM_LEDS, DATA_PIN);
 volatile uint32_t counter = 0;                // ISR で変更するので volatile
 RPI_PICO_Timer ITimer1(1);                    // ハードウェアタイマー #1
 
-// --- 割り込みハンドラ
-//     repeating_timer* 引数で呼び出される
-bool TimerHandler(struct repeating_timer* /*rt*/) {
-  counter = counter + 1;
-  return true;
-}
-
 struct Color {
   int red;
   int green;
@@ -39,49 +32,40 @@ struct Color {
   int white;
 };
 
-// LED パターン生成
-// counter: カウンタ(0.01sec=10msec)
+// LED パターン生成(初期データ)
+// counter10msec: カウンタ(0.01sec=10msec)
 // led_num: LED 番号
 // clr: 出力カラー
 void generate_led_pattern(uint32_t counter10msec, size_t led_num, Color& clr) {
-  int counter = counter10msec / 25; // 0.25sec 単位に変換
-  int period = counter % 16; // 16 段階の周期
-  if ((period == 0) || (period == 2)) { clr.red = 100; }
-  else { clr.red = 0; };
-  if ((period == 4) || (period == 6)) { clr.green = 100; }
-  else { clr.green = 0; };
-  if ((period == 8) || (period == 10)) { clr.blue = 100; }
-  else { clr.blue = 0; };
-  if ((period == 12) || (period == 14)) { clr.white = 100; }
-  else { clr.white = 0; };
-}
-
-// LED パターン生成
-// counter: カウンタ(0.01sec=10msec)
-// led_num: LED 番号
-// clr: 出力カラー
-void generate_led_pattern1(uint32_t counter, size_t led_num, Color& clr) {
-  int phase = (counter + led_num * 10) % 300;
-  if (phase < 100) {
-    clr.red   = phase;
+  int counter = counter10msec / 50; // 0.5sec 単位に変換
+  int period = counter % 4; // 4 段階の周期
+  if (period == 0) {
+    clr.red = 100;
     clr.green = 0;
-    clr.blue  = 100 - phase;
+    clr.blue = 0;
     clr.white = 0;
-  } else if (phase < 200) {
-    clr.red   = 200 - phase;
-    clr.green = phase - 100;
-    clr.blue  = 0;
-    clr.white = 0;
-  } else {
-    clr.red   = 0;
-    clr.green = 300 - phase;
-    clr.blue  = phase - 200;
-    clr.white = 0;
+  } else if (period == 1) {
+    clr.red = 0;
+    clr.green = 100;
+    clr.blue = 0;
+    clr.white = 0;  
+  } else if (period == 2) {
+    clr.red = 0;
+    clr.green = 0;
+    clr.blue = 100;
+    clr.white = 0;  
+  } else if (period == 3) {
+    clr.red = 0;
+    clr.green = 0;
+    clr.blue = 0;
+    clr.white = 100;  
   }
 }
 
-void generate_led_pattern2(uint32_t counter, size_t led_num, Color& clr) {
-  int phase = (counter + led_num * 10) % 300;
+
+// LED パターン生成(色が流れる)
+void generate_led_pattern2(uint32_t counter10msec, size_t led_num, Color& clr) {
+  int phase = (counter10msec + led_num * 10) % 300;
   if (phase < 100) {
     clr.red   = 100;
     clr.green = 0;
@@ -105,6 +89,37 @@ void generate_led_pattern2(uint32_t counter, size_t led_num, Color& clr) {
   }
 }
 
+
+// LED パターン生成（グラデーション）
+void generate_led_pattern3(uint32_t counter10msec, size_t led_num, Color& clr) {
+  int phase = (counter10msec + led_num * 10) % 300;
+  if (phase < 100) {
+    clr.red   = phase;
+    clr.green = 0;
+    clr.blue  = 100 - phase;
+    clr.white = 0;
+  } else if (phase < 200) {
+    clr.red   = 200 - phase;
+    clr.green = phase - 100;
+    clr.blue  = 0;
+    clr.white = 0;
+  } else {
+    clr.red   = 0;
+    clr.green = 300 - phase;
+    clr.blue  = phase - 200;
+    clr.white = 0;
+  }
+}
+
+
+
+
+// --- 割り込みハンドラ
+//     repeating_timer* 引数で呼び出される
+bool TimerHandler(struct repeating_timer* /*rt*/) {
+  counter = counter + 1;
+  return true;
+}
 
 // --- setup / loop
 void setup() {
