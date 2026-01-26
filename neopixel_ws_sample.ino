@@ -65,7 +65,7 @@ void generate_led_pattern(uint32_t counter10msec, size_t led_num, Color& clr) {
 
 // LED パターン生成(色が流れる)
 void generate_led_pattern2(uint32_t counter10msec, size_t led_num, Color& clr) {
-  int phase = (counter10msec + led_num * 10) % 300;
+  int phase = (counter10msec + led_num * 10) % 400;
   if (phase < 100) {
     clr.red   = 100;
     clr.green = 0;
