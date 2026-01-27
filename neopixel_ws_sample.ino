@@ -40,19 +40,19 @@ void generate_led_pattern(uint32_t counter10msec, size_t led_num, Color& clr) {
   int counter = counter10msec / 50; // 0.5sec 単位に変換
   int period = counter % 4; // 4 段階の周期
   if (period == 0) {
-    clr.red = 100;
-    clr.green = 0;
+    clr.red = 50;
+    clr.green = 50;
     clr.blue = 0;
     clr.white = 0;
   } else if (period == 1) {
     clr.red = 0;
-    clr.green = 100;
-    clr.blue = 0;
+    clr.green = 50;
+    clr.blue = 50;
     clr.white = 0;  
   } else if (period == 2) {
-    clr.red = 0;
+    clr.red = 50;
     clr.green = 0;
-    clr.blue = 100;
+    clr.blue = 50;
     clr.white = 0;  
   } else if (period == 3) {
     clr.red = 0;
